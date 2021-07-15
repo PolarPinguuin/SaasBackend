@@ -5,7 +5,8 @@ const path = require('path');
 
 module.exports = {
   createUser,
-  uploadFile
+  uploadFile,
+  getFile
 }
 
 let body = {}
@@ -31,6 +32,14 @@ function uploadFile(req,res, next) {
   // }
   const fileData = response.fileData;
   fs.writeFileSync(`${__dirname}/${fileData.fileName}${fileData.extension}`, fileData.fileBuffer);
-  res.sendFile(path.join(__dirname, `/${fileData.fileName}${fileData.extension}`));
+
+  return next()
+}
+
+function getFile(req, res, next) {
+  console.log(__dirname + '/tst.aes');
+  const file = fs.readFileSync(__dirname +'/tst.aes');
+
+  res.status(200).send(file);
   return next()
 }
