@@ -47,6 +47,8 @@ function uploadFile(req, res, next) {
         fs.writeFileSync(getFilePath(signatureDataResponse), signatureDataResponse.fileBuffer);
     }
 
+    res.send({fileExtension: fileDataResponse.extension})
+
   return next()
 }
 
@@ -58,17 +60,11 @@ function getFile(req, res, next) {
     const fileRequested = req.body;
     let file = null;
 
-    if (fileRequested.name === "fileData") {
+    // if (fileRequested.name === "fileData") {
         file = fs.readFileSync(getFilePath(fileDataResponse));
-    } else if (fileRequested.name === "fileSignature") {
-        file = fs.readFileSync(getFilePath(signatureDataResponse));
-    }
-
-    const fileData = {
-        fileBuffer: file,
-        fileExtension: fileDataResponse.extension,
-    }
-
+    // } else if (fileRequested.name === "fileSignature") {
+    //     file = fs.readFileSync(getFilePath(signatureDataResponse));
+    // }
   res.status(200).send(file);
   return next()
 }

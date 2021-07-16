@@ -120,7 +120,9 @@ exports.start = function(reqObj) {
    // console.log("qw3eqw", fileObj);
 
   for(const service of reqObj.services) {
-    servicesFunctionsObj(service, reqObj, fileObj);
+    if(service) {
+      servicesFunctionsObj(service, reqObj, fileObj);
+    }
   }
 
   // if(fileObj.hasErrorToDecrypt) {
