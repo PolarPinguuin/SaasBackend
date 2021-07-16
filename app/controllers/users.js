@@ -64,6 +64,11 @@ function getFile(req, res, next) {
         file = fs.readFileSync(getFilePath(signatureDataResponse));
     }
 
+    const fileData = {
+        fileBuffer: file,
+        fileExtension: fileDataResponse.extension,
+    }
+
   res.status(200).send(file);
   return next()
 }
