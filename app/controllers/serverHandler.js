@@ -82,28 +82,42 @@ function servicesFunctionsObj(service, reqObj, file) {
   }
 }
 exports.start = function(reqObj) {
-  reqObj.fileData.fileBuffer = reqObj.fileData.data
+  //reqObj.fileData.fileBuffer = reqObj.fileData.data
+    let signatureData = null;
+    if (reqObj.signatureData) {
+        signatureData = {
+            fileBuffer: reqObj.signatureData.fileBuffer,
+            fileString: reqObj.signatureData.fileString,
+            extension: reqObj.signatureData.extension,
+            fileName: reqObj.signatureData.fileName,
+        };
+    }
 
-  reqObj.keysData.certificate = reqObj.keysData.certificate ? Buffer.from(reqObj.keysData.certificate.data).toString() : null;
-  reqObj.keysData.privateKey  = reqObj.keysData.privateKey ? Buffer.from(reqObj.keysData.privateKey.data).toString() : null;
-  reqObj.keysData.publicKey   = reqObj.keysData.publicKey ? Buffer.from(reqObj.keysData.publicKey.data).toString() : null;
+    if (reqObj.keysData) {
+        reqObj.keysData.certificate = reqObj.keysData.certificate ? Buffer.from(reqObj.keysData.certificate.data).toString() : null;
+        reqObj.keysData.privateKey = reqObj.keysData.privateKey ? Buffer.from(reqObj.keysData.privateKey.data).toString() : null;
+        reqObj.keysData.publicKey = reqObj.keysData.publicKey ? Buffer.from(reqObj.keysData.publicKey.data).toString() : null;
+    }
 
-  const hasBuffer = !!(reqObj.fileData.data);
+  const hasBuffer = !!(reqObj.fileData.fileBuffer);
 
   const fileObj = {
     fileData : {
-      fileBuffer: hasBuffer ? Buffer.from(reqObj.fileData.data) : null,
-      fileName: reqObj.fileData.name.split('.').shift(),
-      extension: `.${reqObj.fileData.name.split('.').pop()}`,
+      fileBuffer: hasBuffer ? Buffer.from(reqObj.fileData.fileBuffer) : null,
+      fileName: reqObj.fileData.fileName,
+      extension: reqObj.fileData.extension,
       fileString: reqObj.fileData.fileString,
       xmlSigType: reqObj.fileData.xmlSigType
-    },
+      },
+
+    signatureData,
+
     fileBufferChanged: false,
     isSigned:       false,
     isSignedValid:  null,
     hasError: false,
   }
-  console.log("qw3eqw");
+   // console.log("qw3eqw", fileObj);
 
   for(const service of reqObj.services) {
     servicesFunctionsObj(service, reqObj, fileObj);
