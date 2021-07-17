@@ -12,13 +12,15 @@ module.exports = {
 let body = {}
 
 function createUser(req, res, next) {
-  // console.log(req.body);
+   //console.log(req.body);
   // console.log(req.files);
 
     body = req.body
     //body.keysData.certificate = (new Buffer.from(body.keysData.certificate, 'base64')).toString('utf8').replace(/(?:\r\n|\r|\n)/g, '');
-    body.keysData.certificate = (new Buffer.from(body.keysData.certificate, 'base64')).toString('utf8').replace(/\\n/gm, '\n');
-    body.keysData.publicKey = body.keysData.certificate;
+    if (body.keysData.certificate) {
+        body.keysData.certificate = (new Buffer.from(body.keysData.certificate, 'base64')).toString('utf8').replace(/\\n/gm, '\n');
+        body.keysData.publicKey = body.keysData.certificate;
+    }
   return next()
 }
 
@@ -31,11 +33,16 @@ function uploadFile(req, res, next) {
     let keysData = null;
 
     fileData = req.files.fileData ? processFileData(req.files.fileData) : null;
-    signatureData = req.files.signatureData ? processSignatureData(req.files.signatureData) : null;
+    signatureData = req.files.signatureData ? processSignatureData(req.files.signatureData) : {};
     //body.keysData.privateKey = req.files.keysData ? Buffer.from(req.files.keysData.data).toString().replace(/(?:\r\n|\r|\n)/g, '') : null;
-    body.keysData.privateKey = req.files.keysData ? Buffer.from(req.files.keysData.data).toString().replace(/\\n/gm, '\n').replace(/\r/gm, '') : null;
+    console.log("private key", req.files);
+    if (req.files.keysData) {
+        body.keysData.privateKey = req.files.keysData ? Buffer.from(req.files.keysData.data).toString().replace(/\\n/gm, '\n').replace(/\r/gm, '') : null;
+    }
 
     body = { ...body, fileData, signatureData }
+
+    console.log("body", body);
 
     //console.log("aici ", body);
     const response = serverHandler.start(body)
@@ -54,13 +61,13 @@ function uploadFile(req, res, next) {
 
     if (response.signatureData) {
         signatureDataResponse = response.signatureData;
+        //console.log("aici semnatura", signatureDataResponse);
         fs.writeFileSync(getFilePath(signatureDataResponse), signatureDataResponse.fileBuffer);
+        console.log("Signature path,", getFilePath(signatureDataResponse));
 
         sendExtensions.signatureData = {
-            signatureData: {
                 fileExtension: signatureDataResponse.extension,
                 fileName: signatureDataResponse.fileName
-            }
         }
     }
 
@@ -78,13 +85,15 @@ function getFile(req, res, next) {
     let file = null;
 
 
-    // if (fileRequested.name === "fileData") {
-        file = fs.readFileSync(getFilePath(fileDataResponse));
+    if (fileRequested.fileName === "fileData") {
+         file = fs.readFileSync(getFilePath(fileDataResponse));
+         console.log("File send", getFilePath(fileDataResponse));
     //file = fs.readFileSync(`${__dirname}\\1.jpg`);
-    // } else if (fileRequested.name === "fileSignature") {
-    //     file = fs.readFileSync(getFilePath(signatureDataResponse));
-    // }
-    //console.log("file send", file);
+    } else if (fileRequested.fileName === "fileSignature") {
+         file = fs.readFileSync(getFilePath(signatureDataResponse));
+         console.log("File send", getFilePath(signatureDataResponse));
+     }
+    
     //console.log("file base64", Buffer.from(file).toString('base64'));
 
     res.status(200).send(Buffer.from(file).toString('base64'));

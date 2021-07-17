@@ -31,6 +31,19 @@ const CHECKERS = new Set([
   "sigxmlcheck"
 ]);
 
+const ALL_ALTORITHMS = new Set([
+    "rsa.en",
+    "aesecb.en",
+    "aescbc.en",
+    "rsa.de",
+    "aesecb.de",
+    "aescbc.de",
+    "sigfile",
+    "sigxml",
+    "sigfilecheck",
+    "sigxmlcheck"
+])
+
 function servicesFunctionsObj(service, reqObj, file) {
   console.log(service);
   switch(service.toLowerCase()) {
@@ -78,7 +91,12 @@ function servicesFunctionsObj(service, reqObj, file) {
       file.isSigned = true;
       break;
     case 'sigfilecheck':
-      file.isSignedValid = signatureService.checkSignature(file, reqObj.keysData.publicKey);
+          file.isSignedValid = signatureService.checkSignature(file, reqObj.keysData.publicKey);
+          if (file.isSignedValid) {
+              console.log("Semnatura e valida");
+          } else {
+              console.log("Semnatura - nu e valida")
+          }
       break;
     default:
       console.log("Invalid Parameter");
@@ -123,6 +141,10 @@ exports.start = function(reqObj) {
               service = reqObj.isXmlFile ? 'sigxml' : 'sigfile'
           } else if (service === "verify") {
               service = reqObj.isXmlFile ? 'sigxmlcheck' : 'sigfilecheck'
+          }
+          if (!ALL_ALTORITHMS.has(service)) {
+              console.log("Invalid Parameter");
+              continue;
           }
       servicesFunctionsObj(service, reqObj, fileObj);
     }

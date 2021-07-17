@@ -15,9 +15,13 @@ exports.createSignature = function(file, key) {
 	console.log(signature.toString("base64"))
 	console.log(signature);
 
+	console.log("Aici ajunge");
+
 	file.signatureData.fileBuffer = signature;
 	file.signatureData.fileName = 	file.fileData.fileName;
 	file.signatureData.extension = `${file.fileData.extension}.sig`;
+
+	console.log("Semnatura creata");
 
 	return true;
 }
@@ -31,7 +35,7 @@ exports.checkSignature = function(file, key) {
 	});
 	
 	// signature = signature.toString("base64");
-	const signature = Buffer.from(file.signatureData.fileBuffer.data);
+	const signature = Buffer.from(file.signatureData.fileBuffer);
 	const isVerified = crypto.verify(
 		"sha256",
 		Buffer.from(data),
