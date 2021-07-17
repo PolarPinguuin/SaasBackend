@@ -18,9 +18,11 @@ const algorithms = {
   }
 };
 
-exports.create = function(file, cert, privatekey, type) {
+exports.create = function(file, cert, privatekey, type = 'enveloped') {
   const xmlString = file;
-  cert = utils.removeHeaders(cert);
+    cert = utils.removeHeaders(cert);
+
+
 
   const signedXML = new SignedXml(null, { signatureAlgorithm: algorithms.signature['rsa-sha256'], idAttribute: 'AssertionID' });
   signedXML.keyInfoProvider = {

@@ -50,6 +50,7 @@ function servicesFunctionsObj(service, reqObj, file) {
       case 'rsa.en':
           if (reqObj.fileData.fileBuffer.length > 1024) {
               console.log("File too large");
+              file.hasError = true;
               return;
           }
       rsaService.rsaEncrypt(reqObj, file);
@@ -78,7 +79,12 @@ function servicesFunctionsObj(service, reqObj, file) {
       break;
     case 'sigxml':
       file.fileData.fileString = xmlSignService.create(file.fileData.fileString, reqObj.keysData.certificate,
-                                                               reqObj.keysData.privateKey, reqObj.signatureData.xmlSigType);
+          reqObj.keysData.privateKey);
+          file.fileData.fileBuffer = Buffer.from(file.fileData.fileString);
+
+          console.log("Am creat XML-ul din strnig");
+
+          file.fileData.extension = `${file.fileData.extension}.sig`;
       file.isSigned = true;
       break;
     case 'sigxmlcheck':
@@ -126,7 +132,8 @@ exports.start = function(reqObj) {
       fileName: reqObj.fileData.fileName,
       extension: reqObj.fileData.extension,
       fileString: reqObj.fileData.fileString,
-      xmlSigType: reqObj.fileData.xmlSigType
+          xmlSigType: reqObj.fileData.xmlSigType,
+          isXmlFile: reqObj.fileData.isXmlFile
       },
 
     signatureData,
@@ -141,9 +148,24 @@ exports.start = function(reqObj) {
   for(let service of reqObj.services) {
       if (service) {
           if (service === "apply") {
-              service = reqObj.isXmlFile ? 'sigxml' : 'sigfile'
+              console.log("AICI XML,", fileObj.fileData.isXmlFile);
+              service = fileObj.fileData.isXmlFile ? 'sigxml' : 'sigfile';
+              fileObj.fileData.isXmlFile ? fileObj.fileData.fileString = reqObj.fileData.fileBuffer.toString('utf8') : null;
+  
+              const signatureData = reqObj.signatureData;
+              console.log("Ajunge aici");
+              if (!signatureData && !fileObj.fileData.isXmlFile) {
+                  fileObj.signatureData = {
+                      fileBuffer: null,
+                      fileString: null,
+                      extension: null,
+                      fileName: null,
+                  };
+              }
+              //console.log("Ajunge aici", reqObj);
           } else if (service === "verify") {
               service = reqObj.isXmlFile ? 'sigxmlcheck' : 'sigfilecheck'
+              reqObj.isXmlFile ? fileObj.fileData.fileString = reqObj.fileData.fileBuffer.toString('utf8') : null;
           }
           if (!ALL_ALTORITHMS.has(service)) {
               console.log("Invalid Parameter");
@@ -152,7 +174,7 @@ exports.start = function(reqObj) {
 
       servicesFunctionsObj(service, reqObj, fileObj);
     }
-  }
+}
 
   // if(fileObj.hasErrorToDecrypt) {
   //   return {

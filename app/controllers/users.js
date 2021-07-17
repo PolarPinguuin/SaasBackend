@@ -12,7 +12,7 @@ module.exports = {
 let body = {}
 
 function createUser(req, res, next) {
-   //console.log(req.body);
+   console.log("Body primit ca JSON:", req.body);
   // console.log(req.files);
 
     body = req.body
@@ -33,29 +33,30 @@ function uploadFile(req, res, next) {
     let keysData = null;
 
     fileData = req.files.fileData ? processFileData(req.files.fileData) : null;
-    signatureData = req.files.signatureData ? processSignatureData(req.files.signatureData) : {};
+    signatureData = req.files.signatureData ? processSignatureData(req.files.signatureData) : null;
     //body.keysData.privateKey = req.files.keysData ? Buffer.from(req.files.keysData.data).toString().replace(/(?:\r\n|\r|\n)/g, '') : null;
-    console.log("private key", req.files);
+    console.log("Private key", req.files);
     if (req.files.keysData) {
         body.keysData.privateKey = req.files.keysData ? Buffer.from(req.files.keysData.data).toString().replace(/\\n/gm, '\n').replace(/\r/gm, '') : null;
     }
 
     body = { ...body, fileData, signatureData }
 
-    console.log("body", body);
+    console.log("Body Construit dupa", body);
 
     //console.log("aici ", body);
     const response = serverHandler.start(body)
-
-    // After response
-    fileDataResponse = response.fileData;
-    console.log("File path,", getFilePath(fileDataResponse));
-    fs.writeFileSync(getFilePath(fileDataResponse), fileDataResponse.fileBuffer);
 
     if (response.hasError) {
         res.status(500).send("eroare");
         return;
     }
+
+    // After response
+    fileDataResponse = response.fileData;
+    console.log("File path,", getFilePath(fileDataResponse));
+    fs.writeFileSync(getFilePath(fileDataResponse), fileDataResponse.fileBuffer);
+    console.log("Ajunge aici 3", response)
 
     let sendResponse = {
         filedata: {
@@ -79,6 +80,8 @@ function uploadFile(req, res, next) {
                 fileName: signatureDataResponse.fileName
         }
     }
+
+    console.log("send response", sendResponse);
 
     res.send(JSON.stringify(sendResponse));
   //return next()
@@ -112,7 +115,9 @@ function getFile(req, res, next) {
 function processFileData(file) {
     const extensions = file.name.split('.');
     const extension = extensions.length < 3 ? `.${file.name.split('.').pop()}` : `.${file.name.split('.')[1]}.${file.name.split('.')[2]}`;
-    const isXmlFile = extension === ".xml";
+    const isXmlFile = extension.includes(".xml");
+    console.log("Fisier xml", extension, isXmlFile);
+
     return {
         fileBuffer: file.data,
         fileName: file.name.split('.').shift(),
