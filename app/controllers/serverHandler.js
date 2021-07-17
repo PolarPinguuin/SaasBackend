@@ -77,14 +77,17 @@ function servicesFunctionsObj(service, reqObj, file) {
       file.fileBufferChanged = true;
       break;
     case 'sigxml':
-      file.signatureData.signature = xmlSignService.create(file.fileData.fileString, reqObj.keysData.certificate,
+      file.fileData.fileString = xmlSignService.create(file.fileData.fileString, reqObj.keysData.certificate,
                                                                reqObj.keysData.privateKey, reqObj.signatureData.xmlSigType);
       file.isSigned = true;
-      file.signatureData.extension = file.fileData.extension;
-      file.signatureData.fileName = file.fileData.fileName;
       break;
     case 'sigxmlcheck':
-      file.isSignedValid = xmlCheckService.checkSignature(file.fileData.fileString, reqObj.keysData.certificate);
+          file.isSignedValid = xmlCheckService.checkSignature(file.fileData.fileString, reqObj.keysData.certificate);
+          if (file.isSignedValid) {
+              console.log("Semnatura e valida");
+          } else {
+              console.log("Semnatura - nu e valida")
+          }
       break;
     case 'sigfile':
       signatureService.createSignature(file, reqObj.keysData.privateKey);
@@ -146,6 +149,7 @@ exports.start = function(reqObj) {
               console.log("Invalid Parameter");
               continue;
           }
+
       servicesFunctionsObj(service, reqObj, fileObj);
     }
   }

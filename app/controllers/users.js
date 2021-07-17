@@ -52,11 +52,20 @@ function uploadFile(req, res, next) {
     console.log("File path,", getFilePath(fileDataResponse));
     fs.writeFileSync(getFilePath(fileDataResponse), fileDataResponse.fileBuffer);
 
-    let sendExtensions = {
+    if (response.hasError) {
+        res.status(500).send("eroare");
+        return;
+    }
+
+    let sendResponse = {
         filedata: {
             fileExtension: fileDataResponse.extension,
             fileName: fileDataResponse.fileName
         }
+    }
+
+    if (response.isSignedValid !== null) {
+        sendResponse.isSignedValid = response.isSignedValid;
     }
 
     if (response.signatureData) {
@@ -65,13 +74,13 @@ function uploadFile(req, res, next) {
         fs.writeFileSync(getFilePath(signatureDataResponse), signatureDataResponse.fileBuffer);
         console.log("Signature path,", getFilePath(signatureDataResponse));
 
-        sendExtensions.signatureData = {
+        sendResponse.signatureData = {
                 fileExtension: signatureDataResponse.extension,
                 fileName: signatureDataResponse.fileName
         }
     }
 
-    res.send(JSON.stringify(sendExtensions));
+    res.send(JSON.stringify(sendResponse));
   //return next()
 }
 
