@@ -31,7 +31,7 @@ function uploadFile(req, res, next) {
 
     fileData = req.files.fileData ? processFileData(req.files.fileData) : null;
     signatureData = req.files.signatureData ? processSignatureData(req.files.signatureData) : null;
-    body.keysData.privateKey = Buffer.from(req.files.keysData.data).toString().replace(/(?:\r\n|\r|\n)/g, '');
+    body.keysData.privateKey = req.files.keysData ? Buffer.from(req.files.keysData.data).toString().replace(/(?:\r\n|\r|\n)/g, '') : null;
 
     body = { ...body, fileData, signatureData }
 
@@ -74,7 +74,8 @@ function getFile(req, res, next) {
 }
 
 function processFileData(file) {
-    const extension = `.${file.name.split('.').pop()}`;
+    const extensions = file.name.split('.');
+    const extension = extensions.length < 3 ? `.${file.name.split('.').pop()}` : `.${file.name.split('.')[1]}.${file.name.split('.')[2]}`;
     const isXmlFile = extension === ".xml";
     return {
         fileBuffer: file.data,
