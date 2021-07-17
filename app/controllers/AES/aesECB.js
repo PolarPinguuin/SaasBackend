@@ -16,16 +16,20 @@ exports.encryptFile = function(keys, file) {
     file.fileData.extension = `${file.fileData.extension}.aes`;
 
     console.log("File encripted with aesECB");
+    console.log("File buffer length,", output.length);
+    console.log("File buffer ,", output);
 }
 
 exports.decryptFile = function(keys, file) {
     if (!keys) {
         throw new Error("Could not find the keys");
     }
-    console.log("buffer", file.fileData.fileBuffer);
+    console.log("File buffer", file.fileData.fileBuffer);
+    console.log("File buffer length", file.fileData.fileBuffer.length);
     const inputData = file.fileData.fileBuffer;
 
     try {
+        console.log("Aici keys,", keys.aesData.keyPassword);
         const cipher = crypto.createDecipheriv(ALGORITHM, keys.aesData.keyPassword, Buffer.alloc(0));
         const output = Buffer.concat([cipher.update(inputData) , cipher.final()]);
         

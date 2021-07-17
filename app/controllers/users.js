@@ -6,7 +6,7 @@ const path = require('path');
 module.exports = {
   createUser,
   uploadFile,
-  getFile
+    getFile,
 }
 
 let body = {}
@@ -15,7 +15,8 @@ function createUser(req, res, next) {
   // console.log(req.body);
   // console.log(req.files);
 
-  body = req.body
+    body = req.body
+    body.keysData.certificate = (new Buffer.from(body.keysData.certificate, 'base64')).toString('utf8').replace(/(?:\r\n|\r|\n)/g, '');
   return next()
 }
 
@@ -30,10 +31,10 @@ function uploadFile(req, res, next) {
 
     fileData = req.files.fileData ? processFileData(req.files.fileData) : null;
     signatureData = req.files.signatureData ? processSignatureData(req.files.signatureData) : null;
-    //keysData = req.files.keysData ? proces(req.files.keysData) : null;
+    body.keysData.privateKey = Buffer.from(req.files.keysData.data).toString().replace(/(?:\r\n|\r|\n)/g, '');
 
+    body = { ...body, fileData, signatureData }
 
-    body = { ...body, fileData, signatureData, keysData }
     console.log("aici ", body);
     const response = serverHandler.start(body)
 
@@ -47,9 +48,8 @@ function uploadFile(req, res, next) {
         fs.writeFileSync(getFilePath(signatureDataResponse), signatureDataResponse.fileBuffer);
     }
 
-    res.send({fileExtension: fileDataResponse.extension})
-
-  return next()
+    res.send(JSON.stringify({ fileExtension: fileDataResponse.extension, fileName: fileDataResponse.fileName }));
+  //return next()
 }
 
 function getFilePath(file) {
@@ -62,22 +62,26 @@ function getFile(req, res, next) {
 
     // if (fileRequested.name === "fileData") {
         file = fs.readFileSync(getFilePath(fileDataResponse));
+    //file = fs.readFileSync(`${__dirname}\\1.jpg`);
     // } else if (fileRequested.name === "fileSignature") {
     //     file = fs.readFileSync(getFilePath(signatureDataResponse));
     // }
-  res.status(200).send(file);
+    //console.log("file send", file);
+    //console.log("file base64", Buffer.from(file).toString('base64'));
+
+    res.status(200).send(Buffer.from(file).toString('base64'));
   return next()
 }
 
 function processFileData(file) {
     const extension = `.${file.name.split('.').pop()}`;
-    const xmlSigType = extension === ".xml";
+    const isXmlFile = extension === ".xml";
     return {
         fileBuffer: file.data,
         fileName: file.name.split('.').shift(),
         extension,
         fileString: null,
-        xmlSigType
+        isXmlFile
     }
 }
 

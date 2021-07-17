@@ -93,12 +93,6 @@ exports.start = function(reqObj) {
         };
     }
 
-    if (reqObj.keysData) {
-        reqObj.keysData.certificate = reqObj.keysData.certificate ? Buffer.from(reqObj.keysData.certificate.data).toString() : null;
-        reqObj.keysData.privateKey = reqObj.keysData.privateKey ? Buffer.from(reqObj.keysData.privateKey.data).toString() : null;
-        reqObj.keysData.publicKey = reqObj.keysData.publicKey ? Buffer.from(reqObj.keysData.publicKey.data).toString() : null;
-    }
-
   const hasBuffer = !!(reqObj.fileData.fileBuffer);
 
   const fileObj = {
@@ -119,8 +113,13 @@ exports.start = function(reqObj) {
   }
    // console.log("qw3eqw", fileObj);
 
-  for(const service of reqObj.services) {
-    if(service) {
+  for(let service of reqObj.services) {
+      if (service) {
+          if (service === "apply") {
+              service = reqObj.isXmlFile ? 'sigxml' : 'sigfile'
+          } else if (service === "verify") {
+              service = reqObj.isXmlFile ? 'sigxmlcheck' : 'sigfilecheck'
+          }
       servicesFunctionsObj(service, reqObj, fileObj);
     }
   }
