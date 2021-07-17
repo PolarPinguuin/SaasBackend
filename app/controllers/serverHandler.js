@@ -34,7 +34,11 @@ const CHECKERS = new Set([
 function servicesFunctionsObj(service, reqObj, file) {
   console.log(service);
   switch(service.toLowerCase()) {
-    case 'rsa.en':
+      case 'rsa.en':
+          if (reqObj.fileData.fileBuffer.length > 1024) {
+              console.log("File too large");
+              return;
+          }
       rsaService.rsaEncrypt(reqObj, file);
       file.fileBufferChanged = true;
       break;

@@ -38,6 +38,8 @@ exports.rsaDecrypt = function(reqObj, fileObj) {
 	}
 
 	const encryptedData = fileObj.fileData.fileBuffer;
+	console.log("File buffer to decript", encryptedData);
+	console.log("File buffer to decript(base 64)", encryptedData.toString("base64"));
 	try {
 		const decryptedData = crypto.privateDecrypt(
 			{

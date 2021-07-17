@@ -16,7 +16,9 @@ function createUser(req, res, next) {
   // console.log(req.files);
 
     body = req.body
-    body.keysData.certificate = (new Buffer.from(body.keysData.certificate, 'base64')).toString('utf8').replace(/(?:\r\n|\r|\n)/g, '');
+    //body.keysData.certificate = (new Buffer.from(body.keysData.certificate, 'base64')).toString('utf8').replace(/(?:\r\n|\r|\n)/g, '');
+    body.keysData.certificate = (new Buffer.from(body.keysData.certificate, 'base64')).toString('utf8').replace(/\\n/gm, '\n');
+    body.keysData.publicKey = body.keysData.certificate;
   return next()
 }
 
@@ -28,10 +30,10 @@ function uploadFile(req, res, next) {
     let signatureData = null;
     let keysData = null;
 
-
     fileData = req.files.fileData ? processFileData(req.files.fileData) : null;
     signatureData = req.files.signatureData ? processSignatureData(req.files.signatureData) : null;
-    body.keysData.privateKey = req.files.keysData ? Buffer.from(req.files.keysData.data).toString().replace(/(?:\r\n|\r|\n)/g, '') : null;
+    //body.keysData.privateKey = req.files.keysData ? Buffer.from(req.files.keysData.data).toString().replace(/(?:\r\n|\r|\n)/g, '') : null;
+    body.keysData.privateKey = req.files.keysData ? Buffer.from(req.files.keysData.data).toString().replace(/\\n/gm, '\n').replace(/\r/gm, '') : null;
 
     body = { ...body, fileData, signatureData }
 
@@ -58,7 +60,9 @@ function getFilePath(file) {
 
 function getFile(req, res, next) {
     const fileRequested = req.body;
+    console.log("file requested,", fileRequested);
     let file = null;
+
 
     // if (fileRequested.name === "fileData") {
         file = fs.readFileSync(getFilePath(fileDataResponse));

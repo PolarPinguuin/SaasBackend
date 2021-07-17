@@ -8,5 +8,6 @@ const {responseToJson} = require('../helpers');
 router.post('/users', createUser, responseToJson('users'));
 router.post('/upload', uploadFile, responseToJson('upload'));
 router.get('/upload', getFile, responseToJson('upload'));
+router.post('/getFile', getFile, responseToJson('getFile'));
 
 module.exports = router;
