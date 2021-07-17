@@ -37,7 +37,7 @@ function uploadFile(req, res, next) {
 
     body = { ...body, fileData, signatureData }
 
-    console.log("aici ", body);
+    //console.log("aici ", body);
     const response = serverHandler.start(body)
 
     // After response
@@ -45,12 +45,26 @@ function uploadFile(req, res, next) {
     console.log("File path,", getFilePath(fileDataResponse));
     fs.writeFileSync(getFilePath(fileDataResponse), fileDataResponse.fileBuffer);
 
+    let sendExtensions = {
+        filedata: {
+            fileExtension: fileDataResponse.extension,
+            fileName: fileDataResponse.fileName
+        }
+    }
+
     if (response.signatureData) {
         signatureDataResponse = response.signatureData;
         fs.writeFileSync(getFilePath(signatureDataResponse), signatureDataResponse.fileBuffer);
+
+        sendExtensions.signatureData = {
+            signatureData: {
+                fileExtension: signatureDataResponse.extension,
+                fileName: signatureDataResponse.fileName
+            }
+        }
     }
 
-    res.send(JSON.stringify({ fileExtension: fileDataResponse.extension, fileName: fileDataResponse.fileName }));
+    res.send(JSON.stringify(sendExtensions));
   //return next()
 }
 
